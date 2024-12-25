@@ -1,42 +1,15 @@
 #include "s21_cat.h"
 #include <stdio.h>
 
-void display_text(const char* filename, int b_flag, int e_flag, int n_flag, int s_flag, int t_flag){
+void display_text(const char* filename){
     FILE *file = fopen(filename, "r");
     if (file == NULL){
         printf("cat: %s: No such file or directory\n", filename);
         return;
     }
-
-    int ch, prev_ch = EOF, line_count = 1, blank_line = 0;
+    int ch;
     while ((ch = fgetc(file)) != EOF){
-        // -s
-        if (s_flag && ch == '\n' && prev_ch == '\n') {
-            if (!blank_line) {
-                putchar(ch);
-                blank_line = 1;
-            }
-            continue;
-        }
-        blank_line = 0;
-
-        // -n or -b
-
-        if ((n_flag || b_flag) && (prev_ch == 'n' || prev_ch == EOF)) {
-            if (!b_flag || ch != '\n' ) {
-                printf("%6d\t", line_count);
-            }
-        }
-
-        if (e_flag && ch == '\n') {
-            putchar('$');
-        } else if (t_flag && ch == '\t') {
-            printf("^I");
-            continue;
-        }
-
         putchar(ch);
-        prev_ch = ch;
     }
     if (fclose(file) != 0) {
         perror("Error closing file");
@@ -129,36 +102,6 @@ void display_text_s(const char* filename){
     }
 }
 
-void display_text_t(const char* filename){
-    FILE *file = fopen(filename, "r");
-    if (file == NULL){
-        printf("cat: %s: No such file or directory\n", filename);
-        return;
-    }
-    int ch, next_ch;
-    while ((ch = fgetc(file)) != EOF){
-        if (ch == '\r'){
-            next_ch = fgetc(file);
-            if (next_ch == '\n'){
-                printf("^M\n");
-            } else {
-                if (next_ch == EOF){
-                    ungetc(next_ch, file);
-                }
-            }
-        } else if (ch == '\t'){
-            printf("^I");
-        } else if (ch == '\n'){
-            printf("\n");
-        } else {
-            putchar(ch);
-        }
-    }
-    if (fclose(file) != 0) {
-        perror("Error closing file");
-    }
-}
-
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
@@ -169,28 +112,23 @@ int main(int argc, char *argv[])
     int e_flag = 0;
     int n_flag = 0;
     int s_flag = 0;
-    int t_flag = 0;
     int start = 1;
     for (int i = start; i < argc; i++){
         if (argv[i][0] == '-'){
             if (argv[i][1] == 'b'){
                 b_flag = 1;
             }
-            if (argv[i][1] == 'e')
+            else if (argv[i][1] == 'e')
             {
                 e_flag = 1;
             }
-            if (argv[i][1] == 'n')
+            else if (argv[i][1] == 'n')
             {
                 n_flag = 1;
             }
-            if (argv[i][1] == 's')
+            else if (argv[i][1] == 's')
             {
                 s_flag = 1;
-            }
-            if (argv[i][1] == 't')
-            {
-                t_flag = 1;
             }
         }
         else{
@@ -198,9 +136,18 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    // int line_count = 1, (*line_count_ptr) = &line_count;
+    int line_count = 1, (*line_count_ptr) = &line_count;
     for (int i = start; i < argc; i++){
-        display_text(argv[i], b_flag, e_flag, n_flag, s_flag, t_flag);
+        if      (b_flag)
+            display_text_b(argv[i], line_count_ptr);
+        else if (e_flag)
+            display_text_e(argv[i]);
+        else if (n_flag)
+            display_text_n(argv[i], line_count_ptr);
+        else if (s_flag)
+            display_text_s(argv[i]);
+        else
+            display_text(argv[i]);
     }
     return 0;
 }
