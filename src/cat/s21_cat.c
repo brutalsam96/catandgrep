@@ -9,8 +9,8 @@ void display_text(const char* filename, int b_flag, int e_flag, int n_flag, int 
     }
 
     int ch, prev_ch = EOF, line_count = 1, blank_line = 0;
-    while ((ch = fgetc(file)) != EOF){
-        // -s
+    while ((ch = fgetc(file)) != EOF) {
+        // -s (squeeze blank lines)
         if (s_flag && ch == '\n' && prev_ch == '\n') {
             if (!blank_line) {
                 putchar(ch);
@@ -20,21 +20,24 @@ void display_text(const char* filename, int b_flag, int e_flag, int n_flag, int 
         }
         blank_line = 0;
 
-        // -n or -b
-
-        if ((n_flag || b_flag) && (prev_ch == 'n' || prev_ch == EOF)) {
-            if (!b_flag || ch != '\n' ) {
-                printf("%6d\t", line_count);
+        // -n or -b (line numbering)
+        if ((n_flag || b_flag) && (prev_ch == '\n' || prev_ch == EOF)) {
+            if (!b_flag || ch != '\n') {
+                printf("%6d\t", line_count++);
             }
         }
 
-        if (e_flag && ch == '\n') {
+        // -e (end-of-line markers) and -t (tab markers)
+        if (e_flag && ch == '\n' && prev_ch != '\r') {
             putchar('$');
+        } else if (e_flag || t_flag && ch == '\r') {
+            putchar('^');
+            putchar('M');
+            continue;
         } else if (t_flag && ch == '\t') {
             printf("^I");
             continue;
         }
-
         putchar(ch);
         prev_ch = ch;
     }
