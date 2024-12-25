@@ -2,8 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
-
+void to_lowercase(char* d, const char* s){
+    while (*s) {
+        *d = tolower(*s);
+        d++;
+        s++;
+    }
+    *d = '\0';
+}
 
 void display_text(const char* filename, char** patterns, int pattern_count, int e_flag, int i_flag, int v_flag, int c_flag, int l_flag, int n_flag, int h_flag, int s_flag, int f_flag, int o_flag) {
     FILE *file = fopen(filename, "r");
@@ -13,44 +21,54 @@ void display_text(const char* filename, char** patterns, int pattern_count, int 
     }
 
     char buffer[BUFSIZ];
+    char lower_b[BUFSIZ]; // For case-insensitive matching
+
     while (fgets(buffer, BUFSIZ, file) != NULL) {
         int match_found = 0;
 
-        if (e_flag) {
-            for (int i = 0; i < pattern_count; i++) {
-                char *current = buffer;
-                char *match;
-                while ((match = strstr(current, patterns[i])) != NULL) {
-                    match_found = 1;
-                    printf("%.*s", (int)(match - current), current); 
-                    printf("\033[1;31m%s\033[0m", patterns[i]);      
-                    current = match + strlen(patterns[i]);           
-                }
-                if (match_found) {
-                    printf("%s", current);
-                    break;
-                }
-            }
+        // Prepare the buffer for case-insensitive matching if -i is set
+        if (i_flag) {
+            to_lowercase(lower_b, buffer);
         } else {
-            if (patterns == NULL || patterns[0] == NULL) {
-                printf("No pattern provided\n");
-                fclose(file);
-                return;
+            strcpy(lower_b, buffer);
+        }
+
+        char *current = lower_b; // Pointer for matching
+        char *original = buffer; // Pointer for printing
+
+        for (int i = 0; i < pattern_count; i++) {
+            char lower_p[BUFSIZ];
+            if (i_flag) {
+                to_lowercase(lower_p, patterns[i]);
+            } else {
+                strcpy(lower_p, patterns[i]);
             }
-            char *current = buffer;
+
             char *match;
-            while ((match = strstr(current, patterns[0])) != NULL) {
+            while ((match = strstr(current, lower_p)) != NULL) {
                 match_found = 1;
-                printf("%.*s", (int)(match - current), current); 
-                printf("\033[1;31m%s\033[0m", patterns[0]); 
-                current = match + strlen(patterns[0]);
-            }
-            if (match_found) {
-                printf("%s", current);
+
+                // Calculate offset for highlighting
+                int match_start = match - lower_b;
+                int match_len = strlen(lower_p);
+
+                // Print everything before the match
+                printf("%.*s", match_start, original);
+
+                // Highlight the match
+                printf("\033[1;31m%.*s\033[0m", match_len, &original[match_start]);
+
+                // Move pointers forward past the match
+                current = match + match_len;
+                original += match_start + match_len;
+
+                // Continue checking for additional matches
             }
         }
-        if (!match_found){
-            continue;
+
+        // Print the remainder of the line only once after all matches
+        if (match_found) {
+            printf("%s", original);
         }
     }
 
@@ -58,6 +76,7 @@ void display_text(const char* filename, char** patterns, int pattern_count, int 
         printf("Error closing file\n");
     }
 }
+
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
