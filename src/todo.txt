@@ -1,0 +1,31 @@
+need to test properly, code has chaged on cat
+need to implement --help on both maybe ???
+
+
+Yes, within the if block for -e, you can include commands or conditions to handle additional functionality related to the -e flag. Here are some ideas for what you can add:
+
+Multiple Patterns:
+
+If multiple patterns are allowed with -e, you could iterate through a list of patterns and check for matches.
+Case Insensitive Matching (-i):
+
+Combine -e with -i to perform a case-insensitive search.
+Use functions like strcasecmp or convert both the buffer and pattern to lowercase for comparison.
+Invert Match (-v):
+
+Check if the -v flag is set, and invert the condition so lines that do not contain the pattern are processed.
+Count Matches (-c):
+
+Keep a counter to track the number of lines that match the pattern (or don't match if -v is set).
+Line Number Display (-n):
+
+Add logic to print line numbers alongside matching lines.
+Highlighting:
+
+If you’re handling highlighting within -e, ensure it is combined properly with other flags.
+Quiet Mode (-q):
+
+If -q is implemented, you might exit as soon as the first match is found.
+Read Patterns from File (-f):
+
+If -f is combined with -e, ensure you're checking patterns from both sources (command line and file).
