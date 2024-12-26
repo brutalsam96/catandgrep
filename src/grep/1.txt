@@ -1,3 +1,4 @@
+hello error is error line.
 This is a test file for grep command testing.
 ERROR: This is an error line.
 Warning: This is a warning line.
@@ -5,3 +6,4 @@ Info: General information.
 Another line without significant keywords.
 error: lowercase error line.
 Success: This line indicates success.
+ERROR: This is an ERROR line.

@@ -38,36 +38,43 @@ void display_text(const char* filename, char** patterns, int pattern_count, int 
 
         for (int i = 0; i < pattern_count; i++) {
             char lower_p[BUFSIZ];
-            if (i_flag) {
-                to_lowercase(lower_p, patterns[i]);
-            } else {
-                strcpy(lower_p, patterns[i]);
-            }
+                if (i_flag) {
+                    to_lowercase(lower_p, patterns[i]);
+                } else {
+                    strcpy(lower_p, patterns[i]);
+                }
 
-            char *match;
-            while ((match = strstr(current, lower_p)) != NULL) {
-                match_found = 1;
+                char *match;
+                while ((match = strstr(current, lower_p)) != NULL) {
+                    match_found = 1;
+                    if (v_flag) {
+                        break;
+                    }
+                    // Calculate offset for highlighting
+                    int match_len = strlen(lower_p);
+                    int match_start = match - current;
+                    
 
-                // Calculate offset for highlighting
-                int match_start = match - lower_b;
-                int match_len = strlen(lower_p);
+                    // Print everything before the match
+                    
+                    printf("%.*s", match_start, original);
 
-                // Print everything before the match
-                printf("%.*s", match_start, original);
+                    // Highlight the match
+                    printf("\033[1;31m%.*s\033[0m", match_len, &original[match_start]);
 
-                // Highlight the match
-                printf("\033[1;31m%.*s\033[0m", match_len, &original[match_start]);
+                    // Move pointers forward past the match
+                    current = match + match_len;
+                    original += match_start + match_len;
 
-                // Move pointers forward past the match
-                current = match + match_len;
-                original += match_start + match_len;
-
-                // Continue checking for additional matches
-            }
+                    // Continue checking for additional matches
+                }
+                
         }
 
         // Print the remainder of the line only once after all matches
-        if (match_found) {
+        if (match_found && !v_flag) {
+            printf("%s", original);
+        } else if (v_flag && !match_found) { // Print the line if no matches were found
             printf("%s", original);
         }
     }
@@ -151,6 +158,9 @@ int main(int argc, char* argv[]) {
     // Process files
     for (int i = 0; i < file_count; i++) {
         display_text(files[i], patterns, pattern_count, e_flag, i_flag, v_flag, c_flag, l_flag, n_flag, h_flag, s_flag, f_flag, o_flag);
+        if (i < file_count - 1) {
+            printf("\n");
+        }
     }
 
     free(patterns);
