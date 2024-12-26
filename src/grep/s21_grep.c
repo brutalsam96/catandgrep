@@ -22,6 +22,7 @@ void display_text(const char* filename, char** patterns, int pattern_count, int 
 
     char buffer[BUFSIZ];
     char lower_b[BUFSIZ]; // For case-insensitive matching
+    int count = 0;
 
     while (fgets(buffer, BUFSIZ, file) != NULL) {
         int match_found = 0;
@@ -47,7 +48,7 @@ void display_text(const char* filename, char** patterns, int pattern_count, int 
                 char *match;
                 while ((match = strstr(current, lower_p)) != NULL) {
                     match_found = 1;
-                    if (v_flag) {
+                    if (v_flag || c_flag) {
                         break;
                     }
                     // Calculate offset for highlighting
@@ -68,17 +69,18 @@ void display_text(const char* filename, char** patterns, int pattern_count, int 
 
                     // Continue checking for additional matches
                 }
+            if (c_flag && match_found) count++;
                 
         }
 
         // Print the remainder of the line only once after all matches
-        if (match_found && !v_flag) {
+        if (match_found && !v_flag && !c_flag) {
             printf("%s", original);
-        } else if (v_flag && !match_found) { // Print the line if no matches were found
+        } else if (v_flag && !match_found && !c_flag) { // Print the line if no matches were found
             printf("%s", original);
         }
     }
-
+    if (c_flag) printf("%d\n", count);
     if (fclose(file) != 0) {
         printf("Error closing file\n");
     }
