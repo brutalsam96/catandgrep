@@ -70,6 +70,14 @@ void display_text(const char* filename, int file_count, char** patterns, int pat
                         printf("\033[35m%s\033[36m:\033[0m", filename);
                         at_line_start = 0;
                     }
+
+                    if (o_flag){
+                        printf("\033[1;31m%.*s\033[0m\n", match_len, &original[match_start]);
+                        current = match + match_len;
+                        original += match_start + match_len;
+                        continue;
+                    }
+
                     printf("%.*s", match_start, original);
 
                     // highlight the match
@@ -91,7 +99,7 @@ void display_text(const char* filename, int file_count, char** patterns, int pat
             return;
         }
         // print the remainder of the line only once after all matches
-        if (match_found && !v_flag && !c_flag) {
+        if (match_found && !v_flag && !c_flag && !o_flag) {
             printf("%s", original);
         } else if (v_flag && !match_found && !c_flag) { // Print the line if no matches were found
             printf("%s", original);
