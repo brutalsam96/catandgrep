@@ -5,7 +5,7 @@
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
-      "args": ["-e", "error", "1.txt"],
+      "args": ["-l", "error", "1.txt"],
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "${workspaceFolder}/src/grep",

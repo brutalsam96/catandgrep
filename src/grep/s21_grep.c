@@ -1,96 +1,4 @@
 #include "s21_grep.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-
-void to_lowercase(char* d, const char* s){
-    while (*s) {
-        *d = tolower(*s);
-        d++;
-        s++;
-    }
-    *d = '\0';
-}
-
-
-void display_text(const char* filename, char** patterns, int pattern_count, int e_flag, int i_flag, int v_flag, int c_flag, int l_flag, int n_flag, int h_flag, int s_flag, int f_flag, int o_flag) {
-    FILE *file;
-    if (!strcmp(filename, "stdin")) {
-        file = stdin; // stdin
-    } else {
-        file = fopen(filename, "r");
-        if (file == NULL) {
-            printf("grep: %s: No such file or directory\n", filename);
-            return;
-        }
-    }
-
-    char buffer[BUFSIZ];
-    char lower_b[BUFSIZ]; // case-insensitive
-    int count = 0;
-
-    while (fgets(buffer, BUFSIZ, file) != NULL) {
-        int match_found = 0;
-
-        // if -i case insensitive
-        if (i_flag) {
-            to_lowercase(lower_b, buffer);
-        } else {
-            strcpy(lower_b, buffer);
-        }
-
-        char *current = lower_b; // for matching
-        char *original = buffer; // for printing
-
-        for (int i = 0; i < pattern_count; i++) {
-            char lower_p[BUFSIZ];
-                if (i_flag) {
-                    to_lowercase(lower_p, patterns[i]);
-                } else {
-                    strcpy(lower_p, patterns[i]);
-                }
-
-                char *match;
-                while ((match = strstr(current, lower_p)) != NULL) {
-                    match_found = 1;
-                    if (v_flag || c_flag) {
-                        break;
-                    }
-
-                    int match_len = strlen(lower_p);
-                    int match_start = match - current;
-                    
-
-                    // print before the match
-                    
-                    printf("%.*s", match_start, original);
-
-                    // highlight the match
-                    printf("\033[1;31m%.*s\033[0m", match_len, &original[match_start]);
-
-                    // move pointers forward past the match
-                    current = match + match_len;
-                    original += match_start + match_len;
-
-                }
-            if (c_flag && match_found) count++;
-                
-        }
-
-        // print the remainder of the line only once after all matches
-        if (match_found && !v_flag && !c_flag) {
-            printf("%s", original);
-        } else if (v_flag && !match_found && !c_flag) { // Print the line if no matches were found
-            printf("%s", original);
-        }
-    }
-    if (c_flag) printf("%d\n", count);
-    if (fclose(file) != 0) {
-        printf("Error closing file\n");
-    }
-}
 
 
 int main(int argc, char* argv[]) {
@@ -103,9 +11,18 @@ int main(int argc, char* argv[]) {
     int n_flag = 0, h_flag = 0, s_flag = 0, f_flag = 0, o_flag = 0;
 
     char** patterns = malloc(argc * sizeof(char*));
+    if (!patterns) {
+        printf("Error: Memory allocation failed for patterns\n");
+        return 1;
+    }
     int pattern_count = 0;
 
     char** files = malloc(argc * sizeof(char*));
+    if (!files) {
+        printf("Error: Memory allocation failed for patterns\n");
+        free(patterns);
+        return 1;
+    }
     int file_count = 0;
     
     // Parse arguments
@@ -149,21 +66,21 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    if (!isatty(fileno(stdin))){
-        display_text("stdin", patterns, 1, e_flag, i_flag, v_flag, c_flag, l_flag, n_flag, h_flag, s_flag, f_flag, o_flag);
+    if (!isatty(STDIN_FILENO)){
+        display_text("stdin", file_count, patterns, 1, e_flag, i_flag, v_flag, c_flag, l_flag, n_flag, h_flag, s_flag, f_flag, o_flag);
         return 0;
 
     }
 
     if (pattern_count == 0) {
-        printf("Error: At least one pattern must be specified with -e.\n");
+        if (!s_flag) printf("Error: At least one pattern must be specified with -e.\n");
         free(patterns);
         free(files);
         return 1;
     }
 
     if (file_count == 0) {
-        printf("Error: No file specified.\n");
+        if (!s_flag) printf("Error: No file specified.\n");
         free(patterns);
         free(files);
         return 1;
@@ -171,10 +88,10 @@ int main(int argc, char* argv[]) {
 
     // Process files
     for (int i = 0; i < file_count; i++) {
-        display_text(files[i], patterns, pattern_count, e_flag, i_flag, v_flag, c_flag, l_flag, n_flag, h_flag, s_flag, f_flag, o_flag);
-        if (i < file_count - 1) {
-            printf("\n");
-        }
+        display_text(files[i], file_count, patterns, pattern_count, e_flag, i_flag, v_flag, c_flag, l_flag, n_flag, h_flag, s_flag, f_flag, o_flag);
+        // if (i < file_count - 1 && !l_flag) {
+        //     printf("\n");
+        // }
     }
 
     free(patterns);
