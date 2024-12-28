@@ -104,7 +104,6 @@ void display_text(const char* filename, int file_count, char** patterns, int pat
         } else if (v_flag && !match_found && !c_flag) { // Print the line if no matches were found
             printf("%s", original);
         }
-
         actual_line_count++;
     }
     if (c_flag) printf("%d\n", matching_line_count);

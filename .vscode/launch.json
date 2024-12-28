@@ -5,13 +5,13 @@
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
-      "args": ["-l", "error", "1.txt"],
+      "args": ["-f", "p.txt", "1.txt", "2.txt", "3.txt"],
       "stopAtEntry": false,
-      "externalConsole": true,
+      "externalConsole": false,
       "cwd": "${workspaceFolder}/src/grep",
-      "program": "${workspaceFolder}/src/grep/s21_grep.exe",
+      "program": "${workspaceFolder}/src/grep/s21_grep",
       "MIMode": "gdb",
-      "miDebuggerPath": "gdb.exe",
+      "miDebuggerPath": "gdb",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
