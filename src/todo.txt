@@ -1,46 +1,15 @@
 need to test properly, code has chaged on cat
+
+
 need to implement --help on both maybe ???
 
-### -i on grep is weirding out with multiple files, same with -f
-
-
-
-
-Yes, within the if block for -e, you can include commands or conditions to handle additional functionality related to the -e flag. Here are some ideas for what you can add:
-
-Multiple Patterns:
-
-If multiple patterns are allowed with -e, you could iterate through a list of patterns and check for matches.
-Case Insensitive Matching (-i):
-
-Combine -e with -i to perform a case-insensitive search.
-Use functions like strcasecmp or convert both the buffer and pattern to lowercase for comparison.
-Invert Match (-v):
-
-Check if the -v flag is set, and invert the condition so lines that do not contain the pattern are processed.
-Count Matches (-c):
-
-Keep a counter to track the number of lines that match the pattern (or don't match if -v is set).
-Line Number Display (-n):
-
-Add logic to print line numbers alongside matching lines.
-Highlighting:
-
-If you’re handling highlighting within -e, ensure it is combined properly with other flags.
-Quiet Mode (-q):
-
-If -q is implemented, you might exit as soon as the first match is found.
-Read Patterns from File (-f):
 
 If -f is combined with -e, ensure you're checking patterns from both sources (command line and file).
 
 
-
-
-
-
 If no patterns are provided and -s is not set, you handle the error correctly.
 If no files are provided and -s is not set, you handle the error correctly.
+
 However, you should add more robust testing for edge cases, such as:
 Providing multiple -e options.
 Using -f to read patterns from a file (not currently implemented).
@@ -51,13 +20,7 @@ what if doesnt support ANSI ?
 
 
 
-
-
-Suggested Final Improvements:
-Add runtime error checks for memory allocation and ensure cleanup for all error paths.
-Provide a --no-color option or a way to disable ANSI escape codes for compatibility.
-Test edge cases, such as:
 Multiple -e options.
-Empty files or files with only newline characters.
+#####Empty files or files with only newline characters. 
 Combination of multiple flags (e.g., -c, -v, and -l).
 Ensure all planned flags (-f, -o) are implemented or explicitly mention their absence in usage.

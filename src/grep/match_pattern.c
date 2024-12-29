@@ -42,9 +42,9 @@ void display_text(const char *filename, int file_count, char **patterns,
     return;
   }
   // printf("\033[1;33mCompiled combined regex: %s\n\033[0m", combined_pattern);
-  // // Debugging
 
-  const char *line = buffer;
+
+//   const char *line = buffer;
 
   while (fgets(buffer, BUFSIZ, file) != NULL) {
     check_newline(buffer, BUFSIZ);
