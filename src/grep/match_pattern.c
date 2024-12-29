@@ -4,13 +4,7 @@
 
 
 
-void display_text(const char* filename, int file_count, char** patterns, int pattern_count, 
-                int e_flag,int i_flag,int v_flag,int c_flag,int l_flag,int n_flag,
-                int h_flag,int s_flag,int f_flag,int o_flag){
-    // Mark unused parameters to suppress warnings TEMPORARILY
-    (void)e_flag;
-    (void)f_flag;
-    (void)o_flag;
+void display_text(const char* filename, int file_count, char** patterns, int pattern_count, const grep_flags *flags){
     
     FILE *file;
     if (!strcmp(filename, "stdin")) {
@@ -18,7 +12,7 @@ void display_text(const char* filename, int file_count, char** patterns, int pat
     } else {
         file = fopen(filename, "r");
         if (file == NULL) {
-            if (!s_flag) printf("grep: %s: No such file or directory\n", filename);
+            if (!flags->s_flag) printf("grep: %s: No such file or directory\n", filename);
             return;
         }
     }
@@ -27,46 +21,43 @@ void display_text(const char* filename, int file_count, char** patterns, int pat
 
     char buffer[BUFSIZ];
     char combined_pattern[BUFSIZ];
+    
 
     for(int i = 0; i < pattern_count; i++){
         if (i > 0) strcat(combined_pattern, "|");
         strcat(combined_pattern, patterns[i]);
     }
 
-    int matching_line_count = 0;
+    int matching_line_count = 0;  
     int actual_line_count = 1;
-    int at_line_start = 1;
 
     regex = malloc(sizeof(regex_t));
     if (regex == NULL) {
-        if (!s_flag) printf("Memory allocation failed\n");
+        if (!flags->s_flag) printf("Memory allocation failed\n");
         return;
     }
-    int flags = REG_EXTENDED;
-    if (i_flag) flags |= REG_ICASE;
+    int reg_flags = REG_EXTENDED;
+    if (flags->i_flag) reg_flags |= REG_ICASE;
 
-    if(regcomp(regex, combined_pattern, flags) != 0){
-        if (!s_flag) printf("Invalid combined regular expression: %s\n", combined_pattern);
+    if(regcomp(regex, combined_pattern, reg_flags) != 0){
+        if (!flags->s_flag) printf("Invalid combined regular expression: %s\n", combined_pattern);
         return;
     }
-    printf("Compiled combined regex: %s\n", combined_pattern); // Debugging
+    // printf("\033[1;33mCompiled combined regex: %s\n\033[0m", combined_pattern); // Debugging
 
-    // Compile each pattern into a regex
-    // for (int i = 0; i < pattern_count; i++) {
-    //     int flags = REG_EXTENDED;
-    //     if (i_flag) flags |= REG_ICASE;
-    //     if (regcomp(&regex[i], patterns[i], flags) != 0) {
-    //         if (!s_flag) printf("Invalid regular expression: %s\n", patterns[i]);
-    //         free(regex);
-    //         return;
-    //     }
-    // }
     const char *line = buffer;
 
     while (fgets(buffer, BUFSIZ, file) != NULL) {
-        process_line(buffer, regex);
+        check_newline(buffer, BUFSIZ);
+        int at_line_start = 1;
+        process_line(buffer, regex, flags, &matching_line_count, actual_line_count, at_line_start, file_count, filename);
+        actual_line_count++;
     }
-
+    if (flags->c_flag) printf("%d\n", matching_line_count);
+    if (flags->l_flag && matching_line_count) printf("\033[35m%s\033[0m\n", filename);
+    
+    memset(combined_pattern, 0, sizeof(combined_pattern));
+}
         // int match_found = 0;
         // at_line_start = 1;
         // if -i case insensitive
@@ -149,4 +140,3 @@ void display_text(const char* filename, int file_count, char** patterns, int pat
     // if (fclose(file) != 0) {
     //     if (!s_flag) printf("Error closing file\n");
     // }
-}
