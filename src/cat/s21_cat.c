@@ -48,7 +48,6 @@ void display_text(const char* filename, int b_flag, int e_flag, int n_flag,
   }
 }
 
-
 int main(int argc, char* argv[]) {
   if (argc < 2) {
     printf("Usage %s filename\n", argv[0]);
