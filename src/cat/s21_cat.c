@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 void display_text(const char* filename, int b_flag, int e_flag, int n_flag,
                   int s_flag, int t_flag) {
@@ -35,7 +36,10 @@ void display_text(const char* filename, int b_flag, int e_flag, int n_flag,
     // -t (tab markers)
     if (t_flag && ch == '\t') {
       printf("^I");
-    } else {
+    } else if(t_flag && ch == '\r') {
+      printf("^M");
+    }
+    else {
       putchar(ch);
     }
 
@@ -47,6 +51,40 @@ void display_text(const char* filename, int b_flag, int e_flag, int n_flag,
   }
 }
 
+void parse_flags_and_files(int argc, char* argv[], int* b_flag, int* e_flag, int* n_flag, int* s_flag, int* t_flag, char* filenames[], int* file_count) {
+  *file_count = 0;
+  for (int i = 1; i < argc; i++) {
+    if (argv[i][0] == '-') {
+      for (size_t j = 1; j < strlen(argv[i]); j++) {
+        switch (argv[i][j]) {
+          case 'b':
+            *b_flag = 1;
+            *n_flag = 0;  // -b overrides -n
+            break;
+          case 'e':
+            *e_flag = 1;
+            break;
+          case 'n':
+            if (!*b_flag) *n_flag = 1;  // -b has higher priority
+            break;
+          case 's':
+            *s_flag = 1;
+            break;
+          case 't':
+            *t_flag = 1;
+            break;
+          default:
+            fprintf(stderr, "Unknown option: -%c\n", argv[i][j]);
+            exit(1);
+        }
+      }
+    } else {
+      filenames[*file_count] = argv[i];
+      (*file_count)++;
+    }
+  }
+}
+
 int main(int argc, char* argv[]) {
   if (argc < 2) {
     printf("Usage: %s [-bens] filename...\n", argv[0]);
@@ -54,43 +92,20 @@ int main(int argc, char* argv[]) {
   }
 
   int b_flag = 0, e_flag = 0, n_flag = 0, s_flag = 0, t_flag = 0;
-  int start = 1;
+  char* filenames[argc - 1];
+  int file_count = 0;
 
-  // Parse flags
-  for (int i = 1; i < argc; i++) {
-    if (argv[i][0] == '-') {
-      for (size_t j = 1; j < strlen(argv[i]); j++) {
-        switch (argv[i][j]) {
-          case 'b':
-            b_flag = 1;
-            n_flag = 0;  // -b overrides -n
-            break;
-          case 'e':
-            e_flag = 1;
-            break;
-          case 'n':
-            if (!b_flag) n_flag = 1;  // -b has higher priority
-            break;
-          case 's':
-            s_flag = 1;
-            break;
-          case 't':
-            t_flag = 1;
-            break;
-          default:
-            fprintf(stderr, "Unknown option: -%c\n", argv[i][j]);
-            return 1;
-        }
-      }
-    } else {
-      start = i;
-      break;
-    }
+  // Parse flags and filenames
+  parse_flags_and_files(argc, argv, &b_flag, &e_flag, &n_flag, &s_flag, &t_flag, filenames, &file_count);
+
+  if (file_count == 0) {
+    fprintf(stderr, "No files provided.\n");
+    return 1;
   }
 
   // Process files
-  for (int i = start; i < argc; i++) {
-    display_text(argv[i], b_flag, e_flag, n_flag, s_flag, t_flag);
+  for (int i = 0; i < file_count; i++) {
+    display_text(filenames[i], b_flag, e_flag, n_flag, s_flag, t_flag);
   }
 
   return 0;
