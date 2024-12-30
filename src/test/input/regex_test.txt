@@ -1,0 +1,4 @@
+start of line
+middle of the line
+end of line
+start middle end

@@ -33,6 +33,7 @@ void display_text(const char *filename, int file_count, char **patterns,
     return;
   }
   int reg_flags = REG_EXTENDED;
+  reg_flags |= REG_NEWLINE;
   if (flags->i_flag) reg_flags |= REG_ICASE;
 
   if (regcomp(regex, combined_pattern, reg_flags) != 0) {
