@@ -29,8 +29,12 @@ int main(int argc, char* argv[]) {
     if (argv[i][0] == '-') {  // Options
       for (int j = 1; argv[i][j] != '\0'; j++) {
         if (argv[i][j] == 'e' && i + 1 < argc) {
+          if (argv[i + 1][0] == '\0') {
+            flags.empty_p = 1;
+          } else {
+            patterns[pattern_count++] = argv[++i];
+          }
           flags.e_flag = 1;
-          patterns[pattern_count++] = argv[++i];
           break;
         } else if (argv[i][j] == 'i') {
           flags.i_flag = 1;
@@ -93,7 +97,12 @@ int main(int argc, char* argv[]) {
     } else {
       if (!flags.e_flag && pattern_count == 0) {
         // First non-option argument in default mode is treated as a pattern
-        patterns[pattern_count++] = argv[i];
+        if (strcmp(argv[i], "") == 0) {
+          flags.empty_p = 1;
+        } else {
+          patterns[pattern_count++] = argv[i];
+        }
+        flags.e_flag = 1;
       } else {
         // Remaining arguments are treated as file names
         files[file_count++] = argv[i];
@@ -110,13 +119,13 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  if (pattern_count == 0) {
-    if (!flags.s_flag)
-      printf("Error: At least one pattern must be specified with -e.\n");
-    free(patterns);
-    free(files);
-    return 1;
-  }
+  // if (pattern_count == 0) {
+  //   if (!flags.s_flag)
+  //     printf("Error: At least one pattern must be specified with -e.\n");
+  //   free(patterns);
+  //   free(files);
+  //   return 1;
+  // }
 
   if (file_count == 0) {
     if (!flags.s_flag) printf("Error: No file specified.\n");

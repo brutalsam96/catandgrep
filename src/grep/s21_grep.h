@@ -21,6 +21,7 @@ typedef struct flags {
   int s_flag;
   int f_flag;
   int o_flag;
+  int empty_p;
 } grep_flags;
 void check_newline(char* str, size_t max_size);
 char* strduplicate(const char* str);

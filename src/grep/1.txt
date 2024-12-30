@@ -7,3 +7,4 @@ Another line without significant keywords.
 error: lowercase error line.
 Success: This line indicates success.
 ERROR: This is an ERROR line.
+nospacesheremyman

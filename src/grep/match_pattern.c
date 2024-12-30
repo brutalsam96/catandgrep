@@ -43,11 +43,16 @@ void display_text(const char *filename, int file_count, char **patterns,
   }
   // printf("\033[1;33mCompiled combined regex: %s\n\033[0m", combined_pattern);
 
-
-//   const char *line = buffer;
+  //   const char *line = buffer;
 
   while (fgets(buffer, BUFSIZ, file) != NULL) {
     check_newline(buffer, BUFSIZ);
+    if (flags->empty_p) {
+      if (!flags->h_flag && file_count > 1)
+        printf("\033[35m%s\033[36m:\033[0m", filename);
+      printf("%s", buffer);
+      continue;
+    }
     int at_line_start = 1;
     process_line(buffer, regex, flags, &matching_line_count, actual_line_count,
                  at_line_start, file_count, filename);
